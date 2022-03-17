@@ -1,0 +1,123 @@
+import processing.sound.*;
+import processing.serial.*; 
+
+int x=0;
+int fondo =#A7A7A7;
+char inByte;
+Serial port;  // Create object from Serial class
+int val2;
+
+SoundFile file;
+String audioName = "y2mate.com - Star Wars  Marcha imperial  tema de Darth Vaders orquestal.mp3";
+String path;
+boolean jmp = false;
+
+Car myCar1;
+
+void setup(){
+  port = new Serial(this, "COM15", 115200);
+  myCar1 = new Car(color(255,0,0),100,100,10);
+
+  size(1024,554);
+  stroke(153);
+  path = sketchPath(audioName);
+  file = new SoundFile(this, path);
+  file.play();
+  
+ 
+}
+
+void draw() {
+ if (0 < port.available()) {  // If data is available to read,
+    val2 = port.read();
+ }
+ 
+
+   PImage bck;
+  bck = loadImage("background.png");
+  background(bck);
+  myCar1.display();
+  
+  
+  if((val2>=20)&&(val2<=130)){
+    myCar1.drive_der();
+    //myCar1.display();
+
+  }
+  else if(val2=='s'){
+    myCar1.drive_aba();
+    //myCar1.display();
+
+}
+else if(val2=='w'){
+    myCar1.drive_arri();
+    //myCar1.display();
+
+
+}
+else if((val2>=131)&&(val2<=250)){
+    myCar1.drive_izq();
+    //myCar1.display();
+
+}
+ println(val2);
+ 
+}
+
+class Car { 
+  
+  color c;
+  float xpos;
+  float ypos;
+  float xspeed;
+
+  PImage character;
+  
+  
+  
+  
+  // The Constructor is defined with arguments.
+  Car(color tempC, float tempXpos, float tempYpos, float tempXspeed) { 
+    c = tempC;
+    xpos = tempXpos;
+    ypos = tempYpos;
+    xspeed = tempXspeed;
+  }
+
+  void display() {
+    character = loadImage("Golem3.png");
+   image(character, xpos, ypos);
+  }
+  
+
+
+    void drive_der() {
+    xpos = xpos + xspeed;
+    if (xpos+130 > width) {
+      fondo=color(#FF5FF5);
+      xpos =870;
+    }
+  }
+  void drive_aba() {
+    ypos = ypos + xspeed;
+    if (ypos+50 > height) {
+      fondo=color(#8E2621);
+      ypos = 950;
+    }
+  }
+  void drive_izq() {
+    xpos = xpos - xspeed;
+    if (xpos <0) {
+      fondo=color(#B712AC);
+      xpos = 0;
+    }
+  }
+  void drive_arri() {
+    ypos = ypos - xspeed;
+    if (ypos < 20) {
+      fondo=color(#FAF31C);
+      ypos = 20;
+      
+    }
+  }
+}
