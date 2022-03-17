@@ -1,0 +1,87 @@
+library IEEE;
+library work;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity Top_level is
+--generic(
+--				n : integer := 8			--ancho del registro
+--	 );
+    Port   (
+        
+        clk : in std_logic;
+        rst : in std_logic;                        
+        TX : out STD_LOGIC;
+        RX : in STD_LOGIC;
+        MISO : in STD_LOGIC;                     
+        SCLK : buffer STD_LOGIC;                      
+        SS_N : buffer  STD_LOGIC_VECTOR(0 DOWNTO 0);  
+        MOSI : out STD_LOGIC
+        
+        
+        );
+
+           
+end Top_level;
+
+architecture Behavioral of Top_level is
+
+            
+             signal in_port_v :  std_logic_vector (7 downto 0); 
+             signal in_port_r :  std_logic_vector (7 downto 0); 
+             signal  write :  std_logic;
+             signal  CONTROL :  std_logic;       
+             signal puerto : std_logic_vector (7 downto 0);
+             signal blue :  std_logic_vector (7 downto 0);
+             signal green :  std_logic_vector (7 downto 0);
+             signal pink :  std_logic_vector (7 downto 0);
+             signal INPUT_PORT : STD_LOGIC_VECTOR (7 downto 0);
+             signal registro  :  STD_LOGIC_VECTOR(7 downto 0);
+                    
+begin
+        pink <= blue  when (puerto(6) = '1') else
+                green when (puerto(4) = '1') else
+                (others => '0');
+       
+       bloque_1 : entity work.modulo_spi port map(     
+                                                        clk=>clk,                                             
+                                                        rst =>rst,
+                                                        port_id => puerto,
+                                                        OUTPUT_PORT =>blue,
+                                                        MISO =>MISO,
+                                                        SCLK => SCLK,
+                                                        SS_N =>SS_N,                                                      
+                                                        MOSI => MOSI   ); 
+        
+       bloque_2 : entity work.modulo_uart port map(
+                                                        clk=>clk,
+                                                        rst =>rst,
+                                                        INPUT_PORT =>in_port_v,
+                                                        port_id => puerto,
+                                                        OUTPUT_PORT =>green,
+                                                        TX=>TX,
+                                                        RX=>RX,
+                                                        write_strobe => write);
+                                                        
+                                                        
+                                                        
+        bloque_3 : entity work.registro_puerto_entrada port map(
+		                                                clk=>clk,
+                                                        rst=>rst ,
+                                                       D =>pink,
+                                                       Q => in_port_r  );                                                 
+                                                        
+                                                        
+                                                    
+		bloque_4 : entity work.embedded_kcpsm6 port map(
+		                                                clk=>clk,
+                                                        rst=>rst,
+		                                                in_port =>in_port_r ,
+                                                        out_port => in_port_v,
+                                                        port_id => puerto,
+                                                        write_strobe =>write);
+                                                        
+                                                                                                   
+ 
+                                                       
+                                                    
+end Behavioral;
